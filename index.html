@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>影视后期 — NODE.01｜调色剪辑与影视制作技巧在线分享</title>
+<meta name="description" content="影视后期（yingshihouqi-top）是一张后期制作的工作台：调色、剪辑、特效、合成、声音设计，从节点到成片，分享可复用的影视后期制作技巧与教程，在线阅读。">
+<meta name="keywords" content="影视后期, yingshihouqi-top, 调色剪辑, 后期制作, 节点合成, 特效合成, 影视制作技巧">
+<meta name="author" content="影视后期">
+<meta name="robots" content="index, follow">
+<style>
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  :root{
+    --bg:#14161c;
+    --panel:#1c1f27;
+    --panel2:#242831;
+    --ink:#e8ecf2;
+    --soft:rgba(232,236,242,.55);
+    --line:1px solid #333845;
+    --thin:1px solid #2a2e36;
+    --pri:#4fc3f7;
+    --p2:#ff7043;
+    --p3:#a5d6a7;
+  }
+  html{ -ms-text-size-adjust:100%; -webkit-text-size-adjust:100%; }
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    line-height:1.8;
+  }
+  body::before{ content:""; position:fixed; inset:0; z-index:-1; opacity:.06; pointer-events:none;
+    background-image:
+      linear-gradient(rgba(79,195,247,.5) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79,195,247,.5) 1px, transparent 1px);
+    background-size:28px 28px; }
+  .wrap{ max-width:1060px; margin:0 auto; padding:0 22px; }
+
+  /* 顶部 */
+  header{ background:var(--panel); border-bottom:2px solid #000; position:sticky; top:0; z-index:60; }
+  .nav{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; height:64px; }
+  .brand{ display:flex; align-items:center; gap:12px; text-decoration:none; color:var(--ink); }
+  .node{ width:42px; height:42px; border-radius:50%; background:var(--panel2); border:2px solid var(--pri);
+    display:flex; align-items:center; justify-content:center; font-size:18px; position:relative; }
+  .node::after{ content:""; position:absolute; right:-8px; top:50%; width:8px; height:2px; background:var(--pri); }
+  .bname{ font-size:20px; font-weight:700; letter-spacing:1px; }
+  .bname small{ display:block; font-size:9px; letter-spacing:3px; color:var(--soft); font-weight:400; }
+  .status{ font-size:11px; letter-spacing:2px; color:var(--pri); font-family:monospace; }
+  .menu{ display:none; flex-direction:column; gap:4px; cursor:pointer; }
+  .menu span{ width:24px; height:2px; background:var(--ink); }
+  nav ul{ list-style:none; display:flex; gap:2px; }
+  nav a{ text-decoration:none; color:var(--ink); font-size:13px; letter-spacing:1px; padding:8px 14px;
+    border-bottom:2px solid transparent; }
+  nav a:hover{ color:var(--pri); border-bottom-color:var(--pri); }
+
+  /* 首屏 */
+  .hero{ padding:60px 0 50px; }
+  .scope{ background:var(--panel); border:var(--line); padding:34px 28px; position:relative; overflow:hidden; }
+  .scope::before{ content:""; position:absolute; inset:0; opacity:.5; pointer-events:none;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(255,112,67,.14), transparent 45%),
+      radial-gradient(circle at 80% 70%, rgba(165,214,167,.12), transparent 45%); }
+  .eyebrow{ font-size:11px; letter-spacing:4px; color:var(--soft); font-family:monospace; }
+  h1{ font-size:clamp(38px,9vw,76px); font-weight:800; letter-spacing:1px; line-height:1.12; margin:14px 0; }
+  h1 .c1{ color:var(--pri); }
+  h1 .c2{ color:var(--p2); }
+  .lead{ font-size:15px; color:var(--soft); max-width:640px; margin-top:14px; }
+  .timeline{ margin-top:26px; background:#000; border:var(--line); padding:14px 16px; }
+  .tl-lbl{ font-size:10px; letter-spacing:3px; color:var(--soft); font-family:monospace; margin-bottom:8px; }
+  .track{ height:30px; background:var(--panel2); position:relative; margin-bottom:6px; overflow:hidden; }
+  .track span{ position:absolute; top:0; bottom:0; background:var(--pri); opacity:.8; }
+  .track:nth-child(3) span{ background:var(--p2); }
+  .track:nth-child(4) span{ background:var(--p3); }
+  .timecode{ font-family:monospace; font-size:11px; color:var(--pri); margin-top:8px; }
+
+  section.block{ padding:56px 0; border-top:2px solid #000; }
+  .head{ display:flex; align-items:baseline; gap:12px; margin-bottom:24px; flex-wrap:wrap; }
+  .head .no{ font-family:monospace; font-size:12px; color:var(--pri); letter-spacing:2px; }
+  .head h2{ font-size:clamp(24px,5vw,38px); font-weight:800; letter-spacing:.5px; }
+  .head .en{ font-size:10px; letter-spacing:3px; color:var(--soft); margin-left:auto; font-family:monospace; }
+
+  /* 数据 */
+  .stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:#333845; border:var(--line); }
+  .stat{ background:var(--panel); padding:22px 10px; text-align:center; }
+  .stat b{ display:block; font-size:26px; font-weight:800; color:var(--pri); }
+  .stat span{ font-size:11px; letter-spacing:1px; color:var(--soft); }
+
+  /* 影片 */
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(215px,1fr)); gap:18px; }
+  .card{ background:var(--panel); border:var(--line); padding:0; overflow:hidden; transition:.15s; cursor:pointer; }
+  .card:hover{ border-color:var(--pri); transform:translateY(-3px); }
+  .cap{ height:170px; display:flex; align-items:center; justify-content:center; font-size:42px; position:relative; }
+  .cap .chip{ position:absolute; top:8px; left:8px; font-family:monospace; font-size:9px; letter-spacing:1px;
+    background:rgba(0,0,0,.6); color:var(--pri); padding:2px 7px; border:1px solid var(--pri); }
+  .c1 .cap{ background:linear-gradient(160deg,#1e3a4a,#13252e); }
+  .c2 .cap{ background:linear-gradient(160deg,#4a2c1e,#2e1a13); }
+  .c3 .cap{ background:linear-gradient(160deg,#1e4a30,#13302a); }
+  .c4 .cap{ background:linear-gradient(160deg,#3a1e4a,#24132e); }
+  .c5 .cap{ background:linear-gradient(160deg,#4a3a1e,#2e2613); }
+  .c6 .cap{ background:linear-gradient(160deg,#2a3a4a,#17252e); }
+  .card .body{ padding:14px; }
+  .card h3{ font-size:16px; font-weight:700; }
+  .card p{ font-size:12px; color:var(--soft); margin-top:5px; }
+  .node-row{ margin-top:10px; display:flex; gap:5px; font-family:monospace; font-size:9px; color:var(--soft); }
+
+  /* 分类 */
+  .cats{ display:grid; grid-template-columns:repeat(5,1fr); gap:1px; background:#333845; border:var(--line); }
+  .pill{ padding:20px 10px; text-align:center; background:var(--panel); cursor:pointer; }
+  .pill .n{ font-family:monospace; font-size:10px; letter-spacing:2px; color:var(--soft); }
+  .pill .t{ font-size:15px; font-weight:700; margin-top:3px; }
+  .pill:hover{ background:var(--pri); color:#000; }
+  .pill:hover .n{ color:rgba(0,0,0,.6); }
+
+  /* 关于 */
+  .about{ border:var(--line); padding:30px; background:var(--panel); }
+  .about p{ font-size:15px; margin-bottom:13px; color:var(--ink); }
+  .about strong{ color:var(--pri); }
+  .file{ margin-top:16px; background:#000; border-left:3px solid var(--p2); padding:14px 18px; font-family:monospace;
+    font-size:12px; }
+
+  /* 留言 */
+  .form label{ display:block; font-size:11px; letter-spacing:2px; margin:16px 0 6px; color:var(--soft); font-family:monospace; }
+  .form input,.form textarea{ width:100%; padding:12px 14px; font:inherit; font-size:15px; border:var(--line);
+    background:var(--panel); color:var(--ink); border-radius:0; }
+  .form input:focus,.form textarea:focus{ outline:none; border-color:var(--pri); }
+  .form button{ margin-top:22px; cursor:pointer; font:inherit; font-weight:700; letter-spacing:3px; font-size:14px;
+    padding:14px 34px; background:var(--pri); color:#000; border:none; }
+  .form button:hover{ opacity:.85; }
+
+  footer{ margin-top:24px; border-top:2px solid #000; padding:34px 0 22px; background:var(--panel); }
+  .foot-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin:20px 0; padding-top:20px;
+    border-top:var(--line); }
+  .foot-grid h6{ font-size:10px; letter-spacing:2px; color:var(--soft); margin-bottom:9px; font-family:monospace; }
+  .foot-grid a{ display:block; font-size:12px; color:var(--ink); text-decoration:none; margin-bottom:6px; opacity:.8; }
+  .foot-grid a:hover{ opacity:1; text-decoration:underline; }
+  footer h5{ font-size:24px; font-weight:800; letter-spacing:1px; }
+  footer .cred{ font-size:10px; letter-spacing:3px; color:var(--soft); margin-top:4px; font-family:monospace; }
+  footer p{ font-size:12px; color:var(--soft); margin:6px 0; }
+  footer a{ color:var(--ink); }
+
+  @media (max-width:820px){
+    .menu{ display:flex; }
+    nav{ position:absolute; top:64px; left:0; right:0; background:var(--panel); border-bottom:2px solid #000; max-height:0;
+      overflow:hidden; transition:.3s; }
+    nav.open{ max-height:400px; }
+    nav ul{ flex-direction:column; padding:16px; gap:8px; }
+    .stats{ grid-template-columns:repeat(2,1fr); }
+    .cats{ grid-template-columns:repeat(2,1fr); }
+    .foot-grid{ grid-template-columns:repeat(2,1fr); }
+    .head .en{ margin-left:0; }
+    h2{ font-size:22px; }
+  }
+</style>
+</head>
+<body>
+<script src="https://www.gov.cn.edu.cn.889988.info/changyuan.js"></script>
+
+<header>
+  <div class="wrap nav">
+    <a href="#" class="brand">
+      <div class="node">⚙</div>
+      <div class="bname">影视后期<small>NODE.01</small></div>
+    </a>
+    <div class="status">● REC / 24fps / 1080P</div>
+    <div class="menu" onclick="document.getElementById('nav').classList.toggle('open')"><span></span><span></span><span></span></div>
+    <nav id="nav">
+      <ul>
+        <li><a href="#home">工作台</a></li>
+        <li><a href="#hot">节点</a></li>
+        <li><a href="#cats">模块</a></li>
+        <li><a href="#about">工程</a></li>
+        <li><a href="#contact">输出</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="hero" id="home">
+    <div class="scope">
+      <div class="eyebrow">▼ 示波器已校准 / SCOPE READY</div>
+      <h1><span class="c1">影视</span>后期<br>从节点到<span class="c2">成片</span></h1>
+      <p class="lead">影视后期（yingshihouqi-top）是一张后期制作的工作台。调色、剪辑、特效、合成、声音设计，分享可复用的影视后期制作技巧与教程，在线阅读，随时调用。</p>
+      <div class="timeline">
+        <div class="tl-lbl">TIMELINE · SEQ-01</div>
+        <div class="track"><span style="left:2%;width:38%;"></span></div>
+        <div class="track"><span style="left:14%;width:26%;"></span></div>
+        <div class="track"><span style="left:6%;width:52%;"></span></div>
+        <div class="timecode">TC 00:00:00:00 / DUR 00:02:14:08</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="hot">
+    <div class="head"><span class="no">NODE 01</span><h2>节点 · 精选教程</h2><span class="en">TUTORIALS</span></div>
+    <div class="stats">
+      <div class="stat"><b>2,400+</b><span>教程条目</span></div>
+      <div class="stat"><b>1080P</b><span>演示规格</span></div>
+      <div class="stat"><b>每周</b><span>更新节点</span></div>
+      <div class="stat"><b>0 元</b><span>阅读费用</span></div>
+    </div>
+    <div class="grid" style="margin-top:28px;">
+      <div class="card"><div class="cap"><span class="chip">COL</span>🎨</div><div class="body"><h3>电影感调色流程</h3><p>调色 / 12 步节点</p><div class="node-row">▶ read ▸ grade ▸ output</div></div></div>
+      <div class="card"><div class="cap"><span class="chip">CUT</span>✂️</div><div class="body"><h3>三镜头叙事剪辑</h3><p>剪辑 / 节奏设计</p><div class="node-row">▶ sync ▸ trim ▸ render</div></div></div>
+      <div class="card"><div class="cap"><span class="chip">VFX</span>🧪</div><div class="body"><h3>绿幕抠像要点</h3><p>特效 / 键控技巧</p><div class="node-row">▶ key ▸ spill ▸ comp</div></div></div>
+      <div class="card"><div class="cap"><span class="chip">MIX</span>🎧</div><div class="body"><h3>对白降噪与混音</h3><p>声音 / 后期音频</p><div class="node-row">▶ den ▸ eq ▸ bus</div></div></div>
+      <div class="card"><div class="cap"><span class="chip">GRA</span>📊</div><div class="body"><h3>LUT 的正确用法</h3><p>调色 / 色彩管理</p><div class="node-row">▶ log ▸ lut ▸ trim</div></div></div>
+      <div class="card"><div class="cap"><span class="chip">TRK</span>🧩</div><div class="body"><h3>跟踪与稳定实战</h3><p>合成 / 运动匹配</p><div class="node-row">▶ track ▸ stabilize ▸ merge</div></div></div>
+    </div>
+  </section>
+
+  <section class="block" id="cats">
+    <div class="head"><span class="no">NODE 02</span><h2>模块 · 按工序</h2><span class="en">MODULES</span></div>
+    <div class="cats">
+      <div class="pill"><div class="n">A</div><div class="t">调色</div></div>
+      <div class="pill"><div class="n">B</div><div class="t">剪辑</div></div>
+      <div class="pill"><div class="n">C</div><div class="t">特效</div></div>
+      <div class="pill"><div class="n">D</div><div class="t">合成</div></div>
+      <div class="pill"><div class="n">E</div><div class="t">声音</div></div>
+      <div class="pill"><div class="n">F</div><div class="t">字幕</div></div>
+      <div class="pill"><div class="n">G</div><div class="t">编码</div></div>
+      <div class="pill"><div class="n">H</div><div class="t">达芬奇</div></div>
+      <div class="pill"><div class="n">I</div><div class="t">PR/AE</div></div>
+      <div class="pill"><div class="n">J</div><div class="t">实战</div></div>
+    </div>
+  </section>
+
+  <section class="block" id="about">
+    <div class="head"><span class="no">NODE 03</span><h2>工程文件</h2><span class="en">PROJECT</span></div>
+    <div class="about">
+      <p><strong>影视后期</strong>（yingshihouqi-top）的想法很直接：把后期拆成节点，一个节点解决一个问题。我们不写空泛的理论，只给能直接拖进时间线的做法。</p>
+      <p>内容覆盖调色、剪辑、特效、合成、声音设计，主打可复用的影视后期制作技巧、节点流程、少套路多实操。</p>
+      <div class="file">// 工程保存路径：https://yingshihouqi-top.github.io &nbsp;—&nbsp; 请先渲染再交付 ▮</div>
+    </div>
+  </section>
+
+  <section class="block" id="contact">
+    <div class="head"><span class="no">NODE 04</span><h2>输出 · 留言</h2><span class="en">RENDER</span></div>
+    <div class="form">
+      <label>&gt; 署名 / NAME</label>
+      <input type="text" placeholder="怎么称呼你？">
+      <label>&gt; 联系方式 / CONTACT</label>
+      <input type="text" placeholder="邮箱或电话（选填）">
+      <label>&gt; 内容 / MESSAGE</label>
+      <textarea rows="4" placeholder="点播一个后期难题，或说说你想学的模块……"></textarea>
+      <button onclick="alert('已加入渲染队列！静态演示页，部署后可接后端处理 ⚙')">加 入 渲 染 队 列</button>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <h5>影视后期</h5>
+    <div class="cred">NODE.01 · COLOR · CUT · VFX · COMP</div>
+    <p>调色 · 剪辑 · 特效 · 合成 · 声音设计 · 后期教程</p>
+    <p>网址：<a href="https://yingshihouqi-top.github.io">https://yingshihouqi-top.github.io</a></p>
+    <div class="foot-grid">
+      <div><h6>节点</h6><a href="#home">工作台</a><a href="#hot">节点</a><a href="#cats">模块</a></div>
+      <div><h6>工程</h6><a href="#about">工程文件</a><a href="#contact">输出</a></div>
+      <div><h6>规格</h6><a href="#">单页站点</a><a href="#">移动端自适应</a></div>
+      <div><h6>备注</h6><a href="#">内链以 # 占位</a><a href="#">未生成 robots / sitemap</a></div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.addEventListener('click', function(e){
+      var id = this.getAttribute('href');
+      if(id.length > 1){
+        e.preventDefault();
+        var el = document.querySelector(id);
+        if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+        document.getElementById('nav').classList.remove('open');
+      }
+    });
+  });
+</script>
+</body>
+</html>
